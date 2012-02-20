@@ -1,3 +1,4 @@
 .project
 .settings*
 logs/*.log
+*.DS_Store
