@@ -1,0 +1,11 @@
+{
+	"version" : "1.0",
+	"name" : "Dummy",
+	"id" : "com.allty.dummy",
+	"description" : "My dummy plugin",
+	"url" : "http://foo.bar",
+	"canape_compatibility" : ">=1.0",
+	"plugin_dependencies" : [
+		{"plugin" : "otherplugin", "version" : "1.2"}
+	]
+}
