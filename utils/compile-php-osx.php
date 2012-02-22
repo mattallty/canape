@@ -66,6 +66,7 @@ foreach($modules as $code => $module) {
 
 
 if(!is_dir(WORK_DIR)) {
+	echo "Making dir ".WORK_DIR."\n";
 	mkdir(WORK_DIR);
 }
 if(!is_dir(BIN_DIR)) {
