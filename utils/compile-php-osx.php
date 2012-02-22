@@ -72,8 +72,6 @@ foreach($modules as $code => $module) {
 	$modules[$code]['cflags'] = preg_replace_callback("/%%([a-z]+)::([a-z]+)%%/" , "replacePathsClabback" , $module['cflags']);
 }
 
-
-
 if(!is_dir(WORK_DIR)) {
 	echo "Making dir ".WORK_DIR."\n";
 	mkdir(WORK_DIR);
@@ -83,12 +81,10 @@ if(!is_dir(BIN_DIR)) {
 	mkdir(BIN_DIR);
 }
 
-
 function deleteZlibShared() {
-	$pathinfo = pathinfo(basename($modules['zlib']['url']));
-	if(substr($pathinfo['filename'], -4) == ".tar") {
-		$pathinfo['filename'] = substr($pathinfo['filename'], 0, -4);
-	}
+	unlink(BIN_DIR.SEP."libz.1.2.6.dylib");
+	unlink(BIN_DIR.SEP."libz.1.dylib");
+	unlink(BIN_DIR.SEP."libz.dylib");
 }
 
 foreach($modules as $code => $module) 
