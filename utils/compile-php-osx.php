@@ -13,7 +13,8 @@ $modules = array(
 	'zlib' => array(
 		'url' => 'http://zlib.net/zlib-1.2.6.tar.gz',
 		'configure-options' => '--disable-shared --prefix='.BIN_DIR,
-		'cflags' => ''
+		'cflags' => '',
+		'post-install' => "deleteZlibShared"
 	),
 	/*
 	'libxml' => array(
@@ -82,6 +83,14 @@ if(!is_dir(BIN_DIR)) {
 	mkdir(BIN_DIR);
 }
 
+
+function deleteZlibShared() {
+	$pathinfo = pathinfo(basename($modules['zlib']['url']));
+	if(substr($pathinfo['filename'], -4) == ".tar") {
+		$pathinfo['filename'] = substr($pathinfo['filename'], 0, -4);
+	}
+}
+
 foreach($modules as $code => $module) 
 {
 	chdir(WORK_DIR);
@@ -123,6 +132,11 @@ foreach($modules as $code => $module)
 	echo shell_exec("make");
 	echo shell_exec("make install");
 	echo "Done with $code !\n\n";
+	
+	
+	if(isset($module['post-install'])) {
+		call_user_func("deleteZlibShared");
+	}
 	
 	
 	if($code === "php") {
