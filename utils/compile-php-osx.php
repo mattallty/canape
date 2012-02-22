@@ -1,7 +1,7 @@
 #!/usr/bin/env php
 <?php
-define('WORK_DIR', '/tmp/work_dir');
-define('BIN_DIR', '/tmp/local');
+define('WORK_DIR', '/Users/matt/temp/work_dir');
+define('BIN_DIR', '/Users/matt/temp/local');
 define('SEP', DIRECTORY_SEPARATOR);
 
 $modules = array(
@@ -12,27 +12,34 @@ $modules = array(
 	),
 	'zlib' => array(
 		'url' => 'http://zlib.net/zlib-1.2.6.tar.gz',
-		'configure-options' => '--prefix='.BIN_DIR,
+		'configure-options' => '--disable-shared --prefix='.BIN_DIR,
 		'cflags' => ''
 	),
+	/*
+	'libxml' => array(
+		'url' => 'ftp://xmlsoft.org/libxml2/libxml2-2.7.8.tar.gz',
+		'configure-options' => '--disable-shared --enable-static --without-debug --without-modules --without-legacy --without-python--prefix='.BIN_DIR,
+		'cflags' => ''
+	),*/
 	'php' => array(
 		'url' => 'http://downloads.php.net/stas/php-5.4.0RC8.tar.gz',
 		'cflags' => "",
-		'configure-options' => 	'--prefix='.BIN_DIR.' ',
+		'configure-options' => 	'--prefix='.BIN_DIR.' '.
 								'--enable-cli '.
 								'--enable-sigchild '.
 								'--without-iconv '.
 								'--with-libxml-dir=/usr/lib/ '.
 								'--with-zlib '.
-								'--with-zlib-dir='.BIN_DIR.' '.
-								'--with-bz2=/usr/lib/libbz2.1.0.dylib '.
-								'--with-curl='.BIN_DIR.SEP.'lib '.
+								'--with-zlib-dir='.BIN_DIR.SEP.' '.
+								'--with-curl='.BIN_DIR.SEP.' '.
 								'--disable-fileinfo '.
+								'--disable-phar '.
 								'--enable-pcntl '.
 								'--enable-sockets '.
 								'--enable-sysvmsg '.
 								'--enable-sysvsem '.
 								'--enable-sysvshm '.
+								'--disable-pdo '. 
 								'--disable-tokenizer '. 
 								'--disable-xml '.
 								'--disable-xmlreader '. 
@@ -44,7 +51,8 @@ $modules = array(
 								'--enable-shared=no '.
 								'--disable-cgi '.
 								'--disable-debug '.
-								'--enable-inline-optimization'
+								'--enable-inline-optimization',
+								'--disable-dependency-tracking',
 	 
 	)
 );
@@ -70,6 +78,7 @@ if(!is_dir(WORK_DIR)) {
 	mkdir(WORK_DIR);
 }
 if(!is_dir(BIN_DIR)) {
+	echo "Making dir ".BIN_DIR."\n";
 	mkdir(BIN_DIR);
 }
 
@@ -80,7 +89,7 @@ foreach($modules as $code => $module)
 	
 	if(!file_exists(WORK_DIR.SEP.$pathinfo['basename'])) {
 		echo "Downloading $code...\n";
-		echo shell_exec("curl --silent -O {$module['url']}");
+		exec("curl --silent -O {$module['url']}");
 	}
 	if(substr($pathinfo['filename'], -4) == ".tar") {
 		$pathinfo['filename'] = substr($pathinfo['filename'], 0, -4);
@@ -90,10 +99,12 @@ foreach($modules as $code => $module)
 		exec("rm -Rf ".WORK_DIR.SEP.$pathinfo['filename']);
 	}
 	echo "Untar ".WORK_DIR.SEP.$pathinfo['basename']."...\n";
-	echo shell_exec("tar -xzf ".WORK_DIR.SEP.$pathinfo['basename']);
+	exec("tar -xzf ".WORK_DIR.SEP.$pathinfo['basename']);
 	chdir(WORK_DIR.SEP.$pathinfo['filename']);
 	echo "Configuring $code with ".$module['configure-options']."\n";
-	echo shell_exec($module['cflags']." ./configure ".$module['configure-options']);
+//	echo shell_exec($module['cflags']." ./configure ".$module['configure-options']);
+	exec("./configure ".$module['configure-options']);
+	//echo implode("\n", $out);
 	
 	if($code === "php") {
 		file_put_contents(WORK_DIR.SEP.$pathinfo['filename'].SEP."Makefile", str_replace(
@@ -102,8 +113,13 @@ foreach($modules as $code => $module)
 			file_get_contents(WORK_DIR.SEP.$pathinfo['filename'].SEP."Makefile")
 		));
 	}
-	
+
 	echo "Making $code...\n";
+	
+	if($code === "php") {
+		//exit;
+	}
+	
 	echo shell_exec("make");
 	echo shell_exec("make install");
 	echo "Done with $code !\n\n";
